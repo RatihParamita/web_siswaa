@@ -189,7 +189,7 @@ function StudentEditForm({ isOpen, onClose, studentId, onStudentUpdated }) {
                         <button type="button" onClick={() => { setShowContent(false); setTimeout(onClose, 300); }} className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
                             <FaTimes className="mr-2" /> Batal
                         </button>
-                        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
+                        <button type="submit" className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg flex items-center">
                             <FaSave className="mr-2" /> Simpan
                         </button>
                     </div>
