@@ -135,10 +135,12 @@ function StudentList() {
             "NIM": student.nim,
             "Nama": student.name,
             "Tanggal Lahir": student.born_date,
-            "Kota": student.city
+            "Gender": student.gender,
+            "Kota": student.city,
+            "Alamat": student.address
         }));
 
-        const customHeaders = ["No.", "NIM", "Nama", "Tanggal Lahir", "Kota"];
+        const customHeaders = ["No.", "NIM", "Nama", "Tanggal Lahir", "Gender", "Kota", "Alamat"];
 
         const worksheet = XLSX.utils.json_to_sheet(dataForExport, {
             header: customHeaders // Menggunakan header kustom
@@ -207,13 +209,15 @@ function StudentList() {
         const startY = 70;
 
         autoTable(doc, {
-            head: [['No.', 'NIM', 'Nama', 'Tanggal Lahir', 'Kota']],
+            head: [['No.', 'NIM', 'Nama', 'Tanggal Lahir', 'Gender', 'Kota', 'Alamat']],
             body: filteredStudents.map((student, index) => [
                 indexOfFirstItem + index + 1,
                 student.nim,
                 student.name,
                 student.born_date,
-                student.city
+                student.gender,
+                student.city,
+                student.address
             ]),
             startY: startY,
             theme: 'grid',
