@@ -6,20 +6,10 @@ import { FaUsers, FaMale, FaFemale } from 'react-icons/fa';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Pie, Bar } from 'react-chartjs-2'; // 2. Import komponen <Bar>
 
+import StatCard from '../components/StatCard'; // Import komponen StatCard
+
 // 3. Daftarkan komponen-komponen baru agar bisa digunakan
 ChartJS.register(ArcElement, Tooltip, Legend, Title, CategoryScale, LinearScale, BarElement);
-
-// Komponen kecil untuk menampilkan kartu statistik agar lebih rapi
-const StatCard = ({ icon, label, value, color }) => (
-    <div className={`bg-white p-6 rounded-lg shadow-md flex items-center border-l-4 ${color}`}>
-        {icon}
-        <div className="ml-4">
-            <div className="text-gray-500">{label}</div>
-            <div className="text-2xl font-bold">{value}</div>
-        </div>
-    </div>
-);
-
 
 function Dashboard() {
     const [stats, setStats] = useState(null);
@@ -116,9 +106,24 @@ function Dashboard() {
             
             {/* Bagian Kartu Statistik */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <StatCard icon={<FaUsers size={32} className="text-yellow-500" />} label="Total Students" value={stats.total_students} color="border-yellow-500" />
-                <StatCard icon={<FaMale size={32} className="text-blue-500" />} label="Male Students" value={stats.male_students} color="border-blue-500" />
-                <StatCard icon={<FaFemale size={32} className="text-pink-500" />} label="Female Students" value={stats.female_students} color="border-pink-500" />
+                <StatCard
+                    value={stats.total_students}
+                    label="Total Mahasiswa"
+                    bgColor="bg-yellow-600"
+                    icon={FaUsers} // Ikon untuk total mahasiswa
+                />
+                <StatCard
+                    value={stats.male_students}
+                    label="Jumlah Mahasiswa Laki-laki"
+                    bgColor="bg-blue-600"
+                    icon={FaMale} // Ikon untuk laki-laki
+                />
+                <StatCard
+                    value={stats.female_students}
+                    label="Jumlah Mahasiswa Perempuan"
+                    bgColor="bg-pink-600"
+                    icon={FaFemale} // Ikon untuk perempuan
+                />
             </div>
 
             {/* Bagian Grafik Atas */}
