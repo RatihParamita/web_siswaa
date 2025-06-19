@@ -127,7 +127,46 @@ function StudentList() {
     };
     
     const handleExportExcel = () => {
-        const worksheet = XLSX.utils.json_to_sheet(filteredStudents);
+        const dataForExport = filteredStudents.map((student, index) => ({
+            "No.": index + 1,
+            "NIM": student.nim,
+            "Nama": student.name,
+            "Tanggal Lahir": student.born_date,
+            "Kota": student.city
+        }));
+
+        const customHeaders = ["No.", "NIM", "Nama", "Tanggal Lahir", "Kota"];
+
+        const worksheet = XLSX.utils.json_to_sheet(dataForExport, {
+            header: customHeaders // Menggunakan header kustom
+        });
+
+        const range = XLSX.utils.decode_range(worksheet['!ref']); // Dapatkan rentang sel
+        for (let C = range.s.c; C <= range.e.c; ++C) { // Iterasi melalui kolom di baris pertama (header)
+            const cellRef = XLSX.utils.encode_cell({ c: C, r: 0 }); // Sel header (baris 0)
+            let cell = worksheet[cellRef]; // Dapatkan objek sel yang sudah ada
+
+            // Memastikan objek sel itu sendiri ada
+            if (!cell) {
+                // Jika sel belum ada, buat objek sel baru dengan tipe string dan nilainya
+                // Ini penting karena jika sel tidak ada, style tidak bisa diterapkan
+                cell = { t: 's', v: customHeaders[C] };
+                worksheet[cellRef] = cell;
+            }
+
+            // Memastikan properti 's' (style) ada di objek sel
+            if (!cell.s) {
+                cell.s = {};
+            }
+
+            // Memastikan properti 'font' ada di dalam properti 's'
+            if (!cell.s.font) {
+                cell.s.font = {};
+            }
+
+            // Set properti 'bold' menjadi true di dalam 'font'
+            cell.s.font.bold = true;
+        }
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Mahasiswa");
         XLSX.writeFile(workbook, "Data Mahasiswa.xlsx");
