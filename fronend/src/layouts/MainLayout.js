@@ -20,8 +20,8 @@ const menuConfig = [
         path: '#', // '#' menandakan ini adalah parent/dropdown, bukan link langsung
         icon: FaDatabase,
         children: [
-            { id: 'students', label: 'Mahasiswa', path: '/students', icon: FaUserGraduate },
-            { id: 'cities', label: 'Kota', path: '/cities', icon: FaCity }
+            { id: 'cities', label: 'Kota', path: '/cities', icon: FaCity },
+            { id: 'students', label: 'Mahasiswa', path: '/students', icon: FaUserGraduate }
         ]
     }
 ];
