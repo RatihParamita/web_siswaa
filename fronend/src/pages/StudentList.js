@@ -22,7 +22,12 @@ function StudentList() {
     const [searchTerm, setSearchTerm] = useState('');
     const authToken = localStorage.getItem('auth_token');
 
-    // 1. State baru untuk Pagination
+    // State baru untuk daftar kota unik
+    const [cities, setCities] = useState([]); // Menampung daftar kota unik
+    // State baru untuk filter kota yang dipilih
+    const [selectedCity, setSelectedCity] = useState(''); // Default: semua kota (string kosong)
+
+    // State baru untuk Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10); // Default 10 data per halaman
 
@@ -48,7 +53,27 @@ function StudentList() {
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             setAllStudents(response.data);
-            setFilteredStudents(response.data); // Update filteredStudents juga
+            //setFilteredStudents(response.data); // Update filteredStudents juga
+
+            // Ambil daftar kota unik dari data mahasiswa yang baru diambil
+            const rawCities = response.data.map(student => student.city);
+            const cleanedCities = rawCities
+                .map(city => {
+                    // Jika city adalah null/undefined, jadikan string kosong
+                    if (city === null || city === undefined) {
+                        return '';
+                    }
+                    // Pastikan itu string, lalu trim spasi di awal/akhir
+                    return String(city).trim();
+                })
+                .filter(city => city !== ''); // Hapus string kosong yang tersisa (misalnya dari '   ')
+
+            // Gunakan Set untuk mendapatkan keunikan, lalu urutkan
+            const uniqueCities = [...new Set(cleanedCities)].sort();
+
+            // Tambahkan opsi "Semua Kota" di awal
+            setCities(['', ...uniqueCities]);
+            console.log("Cities state after cleaning and setting:", ['', ...uniqueCities]); // LOG BARU: Pastikan array ini yang masuk
         } catch (error) {
             console.error("Gagal mengambil data mahasiswa:", error);
         }
@@ -59,13 +84,22 @@ function StudentList() {
     }, [authToken]);
 
     useEffect(() => {
-        const results = allStudents.filter(student =>
-            student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            student.nim.toLowerCase().includes(searchTerm.toLowerCase())
+        let results = allStudents.filter(student =>
+            (student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            student.nim.toLowerCase().includes(searchTerm.toLowerCase()))
         );
+
+        // Tambahkan filter kota jika selectedCity tidak kosong
+        if (selectedCity) {
+            results = results.filter(student => student.city === selectedCity);
+        }
+
         setFilteredStudents(results);
-        setCurrentPage(1); // Setiap kali ada pencarian baru, kembali ke halaman 1
-    }, [searchTerm, allStudents]);
+        setCurrentPage(1); // Setiap kali ada pencarian/filter baru, kembali ke halaman 1
+
+        console.log("Selected city:", selectedCity); // LOG 3: Cek nilai selectedCity saat useEffect berjalan
+        console.log("Current cities in render:", cities); // LOG 4: Cek array cities sebelum render ulang
+    }, [searchTerm, selectedCity, allStudents, cities]);
 
     // Fungsi yang dipanggil saat tombol hapus di tabel diklik
     const handleDeleteClick = (studentId) => {
@@ -278,31 +312,60 @@ function StudentList() {
                             <FaUpload className="mr-2" /> Import Data
                         </button>
                     </div>
-                    {/* --- 3. Tambahkan Dropdown untuk "Show Entries" --- */}
+                    {/* Dropdown "Show Entries" */}
                     <div className="flex items-center space-x-2">
                         <label className="text-sm text-gray-600">Show</label>
-                        <select 
-                            value={itemsPerPage} 
+                        <select
+                            value={itemsPerPage}
                             onChange={(e) => {
                                 setItemsPerPage(Number(e.target.value));
-                                setCurrentPage(1); // Kembali ke halaman 1 saat jumlah item diubah
-                            }} 
-                            className="border rounded-lg px-2 py-1 text-sm"
+                                setCurrentPage(1);
+                            }}
+                            className="border rounded-lg px-2 py-1 text-sm" // Tambah ml-2 untuk jarak
                         >
                             <option value={5}>5</option>
                             <option value={10}>10</option>
                             <option value={20}>20</option>
+                            <option value={50}>50</option>
                         </select>
-                        <label className="text-sm text-gray-600">entries</label>
+                        <label className="text-sm text-gray-600 ml-2">entries</label> {/* Tambah ml-2 */}
                     </div>
-                    <div className="w-full md:w-1/3">
-                        <input 
-                            type="text" 
-                            placeholder="Cari berdasarkan NIM atau Nama"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                        />
+                    <div className="flex items-center space-x-2 flex-wrap justify-end w-full md:w-auto">
+
+                        {/* Dropdown Filter Kota */}
+                        <div className="w-full md:w-[300px] flex items-center mb-2 md:mb-0"> {/* Tambah ml-4 untuk jarak dari "Show entries" */}
+                            <label className="text-sm text-gray-600 mr-2">Filter:</label>
+                            <select
+                                value={selectedCity}
+                                onChange={(e) => {
+                                    // Jika nilai yang dipilih adalah '__ALL_CITIES__', set ke string kosong
+                                    // Jika tidak, gunakan nilai sebenarnya
+                                    //setSelectedCity(e.target.value === '__ALL_CITIES__' ? '' : e.target.value);
+                                    //console.log("Selected city changed to:", e.target.value);
+                                    setSelectedCity(e.target.value);
+                                }}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Semua Kota</option>
+
+                                {/* Map hanya kota-kota yang valid dari array cities.
+                                Kita tahu cities sudah berisi "" di awal, jadi kita bisa skip itu. */}
+                                {cities.filter(city => city !== '').map(city => (
+                                    <option key={city} value={city}>{city}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Search Bar */}
+                        <div className="w-full md:w-[300px] mt-2 md:mt-0 md:ml-4">
+                            <input
+                                type="text"
+                                placeholder="Cari berdasarkan NIM atau Nama"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
                     </div>
                 </div>
 
