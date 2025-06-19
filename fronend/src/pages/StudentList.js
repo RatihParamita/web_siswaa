@@ -8,6 +8,8 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+import logo from '../university512.png';
+
 import StudentAddForm from '../forms/StudentAddForm';
 import StudentDetailForm from '../forms/StudentDetailForm';
 import StudentEditForm from '../forms/StudentEditForm';
@@ -128,23 +130,68 @@ function StudentList() {
         const worksheet = XLSX.utils.json_to_sheet(filteredStudents);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Mahasiswa");
-        XLSX.writeFile(workbook, "DataMahasiswa.xlsx");
+        XLSX.writeFile(workbook, "Data Mahasiswa.xlsx");
     };
 
     const handleExportPdf = () => {
         const doc = new jsPDF();
-        doc.text("Data Mahasiswa", 20, 10);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const margin = 20;
+
+        doc.addImage(logo, 'PNG', margin, 15, 30, 30);
+
+        // Mengatur font ke Times New Roman (atau font serif generik)
+        doc.setFont("Times", "Roman");
+
+        const headerXOffset = 15; // Sesuaikan offset ini sesuai kebutuhan
+        const headerCenter = (pageWidth / 2) + headerXOffset;
+
+        doc.setFontSize(11);
+        doc.text("KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET, DAN TEKNOLOGI", headerCenter, 20, { align: 'center' });
+        doc.setFontSize(13);
+        doc.text("<NAMA UNIVERSITAS>", headerCenter, 26, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text("<Alamat lengkap Universitas>", headerCenter, 32, { align: 'center' });
+        doc.text("Telepon (0341) ****** Pes. ***-***, 0341-******, Fax. (0341) ******", headerCenter, 37, { align: 'center' });
+        doc.text("Laman: www.university.ac.id", headerCenter, 42, { align: 'center' });
+
+        doc.setLineWidth(0.3);
+        doc.line(margin, 50, pageWidth - margin, 50);
+
+        doc.setFontSize(14);
+        doc.setFont("Times", "Bold");
+        doc.text("LAPORAN DATA MAHASISWA", pageWidth / 2, 62, { align: 'center' });
+
+        const startY = 70;
+
         autoTable(doc, {
             head: [['No.', 'NIM', 'Nama', 'Tanggal Lahir', 'Kota']],
             body: filteredStudents.map((student, index) => [
-                indexOfFirstItem + index + 1, // Gunakan nomor urut yang benar
+                indexOfFirstItem + index + 1,
                 student.nim,
                 student.name,
                 student.born_date,
                 student.city
             ]),
+            startY: startY,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [13, 71, 161],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                font: 'Times'
+            },
+            alternateRowStyles: {
+                fillColor: [245, 245, 245]
+            },
+            styles: {
+                fontSize: 10,
+                cellPadding: 3,
+                rowHeight: 10,
+                font: 'Times'
+            }
         });
-        doc.save('DataMahasiswa.pdf');
+        doc.save('Data Mahasiswa.pdf');
     };
 
     // --- 2. LOGIKA UNTUK PAGINATION ---
