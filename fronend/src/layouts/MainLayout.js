@@ -120,7 +120,9 @@ const Sidebar = ({ isOpen }) => {
                             className="h-8 w-8 mr-3"
                             style={{ filter: 'brightness(0) invert(1) sepia(1) hue-rotate(200deg) saturate(5)' }} // Filter untuk mendapatkan warna abu-abu
                         />
-                        <span>University Web</span>
+                        <Link to="/dashboard" className="text-white hover:text-blue-500 focus:outline-none">
+                            <span>University Web</span>
+                        </Link>
                     </div>
                 )}
             </div>
