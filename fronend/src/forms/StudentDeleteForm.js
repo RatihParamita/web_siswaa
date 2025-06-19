@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'; // Menambahkan ikon untuk konfirmasi
+import { FaTimes, FaCheckCircle, FaExclamationTriangle, FaTrash } from 'react-icons/fa'; // Menambahkan ikon untuk konfirmasi
 
 // Props:
 // isOpen: Boolean, untuk mengontrol apakah form terlihat.
@@ -98,7 +98,7 @@ function StudentDeleteForm({ isOpen, onClose, onConfirm, studentToDelete }) {
                         onClick={handleConfirmClick}
                         className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center"
                     >
-                        <FaCheckCircle className="mr-2" /> Hapus
+                        <FaTrash className="mr-2" /> Hapus
                     </button>
                 </div>
             </div>
