@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
-import { FaPlus, FaEye, FaEdit, FaTrash, FaFileExcel, FaFilePdf } from 'react-icons/fa';
+import { FaPlus, FaEye, FaEdit, FaTrash, FaFileExcel, FaFilePdf, FaUpload } from 'react-icons/fa';
 
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
@@ -14,6 +14,7 @@ import StudentAddForm from '../forms/StudentAddForm';
 import StudentDetailForm from '../forms/StudentDetailForm';
 import StudentEditForm from '../forms/StudentEditForm';
 import StudentDeleteForm from '../forms/StudentDeleteForm';
+import StudentImportForm from '../forms/StudentImportForm';
 
 function StudentList() {
     const [allStudents, setAllStudents] = useState([]); 
@@ -35,7 +36,9 @@ function StudentList() {
     const [editingStudentId, setEditingStudentId] = useState(null);
     // State baru untuk mengontrol visibilitas form delete dan ID
     const [isDeleteFormOpen, setIsDeleteFormOpen] = useState(false);
-    const [studentToDelete, setStudentToDelete] = useState(null); // Sekarang akan menyimpan seluruh objek mahasiswa
+    const [studentToDelete, setStudentToDelete] = useState(null); // Menyimpan seluruh objek mahasiswa
+    // State baru untuk mengontrol visibilitas form import
+    const [isImportFormOpen, setIsImportFormOpen] = useState(false);
 
     // Fungsi untuk mengambil data mahasiswa (dipisah agar bisa dipanggil ulang)
     const fetchStudents = async () => {
@@ -263,6 +266,13 @@ function StudentList() {
                         <button onClick={handleExportPdf} className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm">
                             <FaFilePdf className="mr-2" /> Export PDF
                         </button>
+                        {/* Tombol Import Data */}
+                        <button
+                            onClick={() => setIsImportFormOpen(true)}
+                            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg flex items-center text-sm"
+                        >
+                            <FaUpload className="mr-2" /> Import Data
+                        </button>
                     </div>
                     {/* --- 3. Tambahkan Dropdown untuk "Show Entries" --- */}
                     <div className="flex items-center space-x-2">
@@ -389,6 +399,13 @@ function StudentList() {
                 onClose={handleCloseDeleteForm}
                 onConfirm={handleConfirmDelete} // Fungsi yang akan dieksekusi saat konfirmasi hapus
                 studentToDelete={studentToDelete} // Meneruskan seluruh objek mahasiswa
+            />
+
+            {/* Render komponen StudentImportForm yang baru */}
+            <StudentImportForm
+                isOpen={isImportFormOpen}
+                onClose={() => setIsImportFormOpen(false)}
+                onImportSuccess={fetchStudents}
             />
         </MainLayout>
     );

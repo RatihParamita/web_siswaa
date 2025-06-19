@@ -21,4 +21,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard-stats', [DashboardController::class, 'getStats']); 
 
     Route::apiResource('cities', CityController::class);
+
+    Route::post('/students/import', [StudentController::class, 'import']);
 });
