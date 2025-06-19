@@ -1,13 +1,40 @@
-import React, { useState, useEffect, useRef } from 'react'; // Import useRef
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaTachometerAlt, FaDatabase, FaUserGraduate, FaCity, FaUserCircle, FaSignOutAlt, FaChevronDown, FaBars } from 'react-icons/fa';
+import { FaTachometerAlt, FaDatabase, FaUserGraduate, FaCity, FaUserCircle, FaSignOutAlt, FaChevronDown, FaBars, FaSearch, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 
+import logo from '../university512.png';
+
 // --- KOMPONEN SIDEBAR ---
+// Ini adalah daftar lengkap menu, termasuk sub-menu
+const menuConfig = [
+    {
+        id: 'dashboard',
+        label: 'Dashboard',
+        path: '/dashboard',
+        icon: FaTachometerAlt
+    },
+    {
+        id: 'data',
+        label: 'Data',
+        path: '#', // '#' menandakan ini adalah parent/dropdown, bukan link langsung
+        icon: FaDatabase,
+        children: [
+            { id: 'students', label: 'Mahasiswa', path: '/students', icon: FaUserGraduate },
+            { id: 'cities', label: 'Kota', path: '/cities', icon: FaCity }
+        ]
+    }
+];
+
 const Sidebar = ({ isOpen }) => {
     const location = useLocation();
-    const [isDataMenuOpen, setIsDataMenuOpen] = useState(false);
+    // Gunakan state terpisah untuk membuka dropdown berdasarkan pencarian
+    const [isDataMenuOpenForSearch, setIsDataMenuOpenForSearch] = useState(false);
+    const [isDataMenuOpen, setIsDataMenuOpen] = useState(false); // Untuk normal dropdown
     const submenuRef = useRef(null); // Membuat ref untuk elemen submenu
+
+    // State untuk nilai input search
+    const [searchTerm, setSearchTerm] = useState('');
 
     const isActive = (path) => location.pathname.startsWith(path);
     const isDataActive = isActive('/students') || isActive('/cities');
@@ -16,9 +43,11 @@ const Sidebar = ({ isOpen }) => {
         if (isDataActive) {
             setIsDataMenuOpen(true);
         }
-        // Jika sidebar ditutup, dropdown menu juga ikut tertutup
+        // Jika sidebar ditutup, dropdown menu juga ikut tertutup dan search term dikosongkan
         if (!isOpen) {
             setIsDataMenuOpen(false);
+            setIsDataMenuOpenForSearch(false); // Pastikan ini juga tertutup
+            setSearchTerm('');
         }
     }, [isDataActive, isOpen]);
 
@@ -27,55 +56,155 @@ const Sidebar = ({ isOpen }) => {
         return submenuRef.current ? submenuRef.current.scrollHeight : 0;
     };
 
+    // Handler ketika input search berubah
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    // Handler untuk membersihkan search term
+    const clearSearch = () => {
+        setSearchTerm('');
+        setIsDataMenuOpenForSearch(false); // Pastikan dropdown search tertutup saat clear
+    };
+
+    // Logika filtering yang lebih kompleks:
+    // Mengembalikan struktur menu yang sama, tetapi dengan item yang tidak cocok disaring.
+    // Jika parent cocok atau memiliki anak yang cocok, parent akan disertakan.
+    const filteredMenu = useMemo(() => {
+        if (!searchTerm.trim()) {
+            return menuConfig; // Jika tidak ada search term, tampilkan semua menu
+        }
+
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const results = [];
+
+        menuConfig.forEach(item => {
+            const parentMatches = item.label.toLowerCase().includes(lowerCaseSearchTerm);
+
+            if (item.children) {
+                // Filter anak-anak yang cocok
+                const matchedChildren = item.children.filter(child =>
+                    child.label.toLowerCase().includes(lowerCaseSearchTerm)
+                );
+
+                if (parentMatches || matchedChildren.length > 0) {
+                    // Jika parent cocok atau memiliki anak yang cocok, sertakan parent
+                    results.push({
+                        ...item,
+                        // Hanya sertakan anak-anak yang cocok jika ada
+                        children: matchedChildren.length > 0 ? matchedChildren : (parentMatches ? item.children : [])
+                    });
+                    // Jika ada hasil pencarian dan parent ini memiliki anak yang cocok,
+                    // maka kita ingin dropdownnya otomatis terbuka
+                    if (item.id === 'data' && (parentMatches || matchedChildren.length > 0)) {
+                        setIsDataMenuOpenForSearch(true);
+                    }
+                }
+            } else if (parentMatches) {
+                // Jika item top-level cocok
+                results.push(item);
+            }
+        });
+        return results;
+    }, [searchTerm]); // Dependensi: searchTerm
+
     return (
         <div className={`h-screen bg-gray-800 text-white flex flex-col fixed transition-all duration-300 ${isOpen ? 'w-64' : 'w-20'}`}>
             {/* Header Sidebar */}
             <div className={`text-xl font-bold p-5 border-b border-gray-700 flex items-center ${!isOpen && 'justify-center'}`}>
-                {isOpen && <span>University Dashboard</span>}
+                {isOpen && (
+                    <div className="flex items-center">
+                        <img
+                            src={logo}
+                            alt="University Logo"
+                            className="h-8 w-8 mr-3"
+                            style={{ filter: 'brightness(0) invert(1) sepia(1) hue-rotate(200deg) saturate(5)' }} // Filter untuk mendapatkan warna abu-abu
+                        />
+                        <span>University Web</span>
+                    </div>
+                )}
             </div>
+
+            {/* Search Bar */}
+            {isOpen && (
+                <div className="p-4">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Searching..."
+                            className="w-full pl-4 pr-10 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                        />
+                        {searchTerm ? (
+                            <button
+                                onClick={clearSearch}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                                title="Clear search"
+                            >
+                                <FaTimes size={20} />
+                            </button>
+                        ) : (
+                            <FaSearch size={20} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Navigasi */}
             <nav className="flex-grow p-4">
                 <ul>
-                    <li className={`mb-1 rounded-lg ${isActive('/dashboard') ? 'bg-blue-600' : 'hover:bg-gray-700'}`}>
-                        <Link to="/dashboard" className="flex items-center p-3">
-                            <FaTachometerAlt size={20} />
-                            {/* Teks hanya muncul jika sidebar terbuka */}
-                            <span className={`ml-4 transition-opacity duration-200 ${!isOpen && 'opacity-0 hidden'}`}>Dashboard</span>
-                        </Link>
-                    </li>
-                    <li className="mb-1 rounded-lg">
-                        <button onClick={() => isOpen && setIsDataMenuOpen(!isDataMenuOpen)} className={`w-full flex justify-between items-center p-3 rounded-lg ${isDataActive ? 'bg-blue-600' : 'hover:bg-gray-700'} ${!isOpen && 'justify-center'}`}>
-                            <div className="flex items-center">
-                                <FaDatabase size={20} />
-                                <span className={`ml-4 transition-opacity duration-200 ${!isOpen && 'opacity-0 hidden'}`}>Data</span>
-                            </div>
-                            {isOpen && <FaChevronDown className={`transition-transform duration-300 ${isDataMenuOpen ? 'transform rotate-180' : ''}`} />}
-                        </button>
-                        {/* --- ANIMASI SLIDE --- */}
-                        <ul
-                            ref={submenuRef} // Sambungkan ref ke elemen ul
-                            className={`
-                                overflow-hidden transition-all duration-300 ease-in-out
-                                ${isDataMenuOpen ? 'opacity-100' : 'opacity-0'}
-                                ${isOpen ? 'pl-4 mt-1' : ''}
-                            `}
-                            style={{
-                                maxHeight: isDataMenuOpen ? `${getSubmenuHeight()}px` : '0px',
-                                // Menghindari `display: none` saat tertutup agar transisi tetap jalan
-                                // Namun, jika sidebar tertutup, tetap menyembunyikan submenu
-                                display: !isOpen && !isDataMenuOpen ? 'none' : 'block'
-                            }}
-                        >
-                            <li className={`mb-1 rounded-lg ${isActive('/students') ? 'bg-blue-500' : 'hover:bg-gray-600'}`}>
-                                <Link to="/students" className="flex items-center p-2 pl-5"><FaUserGraduate className="mr-3" /> Mahasiswa</Link>
-                            </li>
-                            <li className={`mb-1 rounded-lg ${isActive('/cities') ? 'bg-blue-500' : 'hover:bg-gray-600'}`}>
-                                <Link to="/cities" className="flex items-center p-2 pl-5"><FaCity className="mr-3" /> Kota</Link>
-                            </li>
-                        </ul>
-                        {/* --- AKHIR ANIMASI SLIDE --- */}
-                    </li>
+                    {filteredMenu.length > 0 ? (
+                        filteredMenu.map(item => (
+                            <React.Fragment key={item.id}>
+                                {item.path !== '#' ? ( // Item menu biasa (bukan dropdown)
+                                    <li className={`mb-1 rounded-lg ${isActive(item.path) ? 'bg-blue-600' : 'hover:bg-gray-700'}`}>
+                                        <Link to={item.path} className="flex items-center p-3">
+                                            {item.icon && <item.icon size={20} />}
+                                            <span className={`ml-4 transition-opacity duration-200 ${!isOpen && 'opacity-0 hidden'}`}>{item.label}</span>
+                                        </Link>
+                                    </li>
+                                ) : ( // Item menu dengan anak (dropdown)
+                                    <li className="mb-1 rounded-lg">
+                                        <button
+                                            onClick={() => isOpen && setIsDataMenuOpen(!isDataMenuOpen)}
+                                            className={`w-full flex justify-between items-center p-3 rounded-lg ${isDataActive && item.id === 'data' ? 'bg-blue-600' : 'hover:bg-gray-700'} ${!isOpen && 'justify-center'}`}
+                                        >
+                                            <div className="flex items-center">
+                                                {item.icon && <item.icon size={20} />}
+                                                <span className={`ml-4 transition-opacity duration-200 ${!isOpen && 'opacity-0 hidden'}`}>{item.label}</span>
+                                            </div>
+                                            {isOpen && <FaChevronDown className={`transition-transform duration-300 ${(isDataMenuOpen || (searchTerm && isDataMenuOpenForSearch && item.id === 'data')) ? 'transform rotate-180' : ''}`} />}
+                                        </button>
+                                        <ul
+                                            ref={submenuRef} // Ref untuk animasi tinggi
+                                            className={`
+                                                overflow-hidden transition-all duration-300 ease-in-out
+                                                ${(isDataMenuOpen || (searchTerm && isDataMenuOpenForSearch && item.id === 'data')) ? 'opacity-100' : 'opacity-0'}
+                                                ${isOpen ? 'pl-4 mt-1' : ''}
+                                            `}
+                                            style={{
+                                                // MaxHeight disesuaikan untuk selalu terbuka saat ada pencarian yang cocok
+                                                maxHeight: (isDataMenuOpen || (searchTerm && isDataMenuOpenForSearch && item.id === 'data')) ? `${getSubmenuHeight()}px` : '0px',
+                                                display: !isOpen && !isDataMenuOpen && !(searchTerm && isDataMenuOpenForSearch && item.id === 'data') ? 'none' : 'block'
+                                            }}
+                                        >
+                                            {/* Render hanya anak-anak yang ada di item.children yang sudah difilter */}
+                                            {item.children.map(child => (
+                                                <li key={child.id} className={`mb-1 rounded-lg ${isActive(child.path) ? 'bg-blue-500' : 'hover:bg-gray-600'}`}>
+                                                    <Link to={child.path} className="flex items-center p-2 pl-5">
+                                                        {child.icon && <child.icon className="mr-3" />} {child.label}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </li>
+                                )}
+                            </React.Fragment>
+                        ))
+                    ) : (
+                        <li className="p-3 text-gray-400">Tidak ada hasil ditemukan.</li>
+                    )}
                 </ul>
             </nav>
         </div>
