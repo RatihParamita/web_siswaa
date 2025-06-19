@@ -1,6 +1,5 @@
-// fronend > src > components > StatCard.js
 import React from 'react';
-import { FaUsers, FaMale, FaFemale } from 'react-icons/fa'; // Import ikon yang akan digunakan
+import { FaUsers, FaMale, FaFemale } from 'react-icons/fa';
 
 function StatCard({ value, label, bgColor, icon: IconComponent }) {
   return (
