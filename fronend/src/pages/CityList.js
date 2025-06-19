@@ -123,9 +123,9 @@ function CityList() {
                 <table className="min-w-full bg-white">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="text-left py-3 px-4 uppercase font-semibold text-sm w-1/12">No.</th>
-                            <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Nama</th>
-                            <th className="text-left py-3 px-4 uppercase font-semibold text-sm w-1/6">Aksi</th>
+                            <th className="py-3 px-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">No.</th>
+                            <th className="py-3 px-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">Nama</th>
+                            <th className="py-3 px-4 text-left text-sm font-bold text-gray-600 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
