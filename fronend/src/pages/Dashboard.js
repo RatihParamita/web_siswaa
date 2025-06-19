@@ -11,7 +11,8 @@ import StatCard from '../components/StatCard'; // Import komponen StatCard
 // 3. Daftarkan komponen-komponen baru agar bisa digunakan
 ChartJS.register(ArcElement, Tooltip, Legend, Title, CategoryScale, LinearScale, BarElement);
 
-function Dashboard() {
+function Dashboard({ isSidebarOpen }) {
+    console.log('Dashboard rendered. isSidebarOpen:', isSidebarOpen);
     const [stats, setStats] = useState(null);
     const authToken = localStorage.getItem('auth_token');
 
@@ -97,7 +98,7 @@ function Dashboard() {
             label: 'Jumlah Kelahiran Siswa',
             data: stats?.students_by_year.map(item => item.total) || [],
             //backgroundColor: 'rgba(59, 130, 246, 0.8)',
-            borderColor: 'rgba(59, 130, 246, 1)',
+            //borderColor: 'rgba(59, 130, 246, 1)',
             borderWidth: 1,
         }]
     };
@@ -176,8 +177,9 @@ function Dashboard() {
 
             {/* Bagian Grafik Tahun Kelahiran (Bar Chart) dengan Gradien */}
             <div className="mt-6 bg-white p-6 rounded-lg shadow-md flex justify-center items-center">
-                <div style={{ width: '100%', height: '500px' }}>
+                <div style={{ width: '95%', height: '500px' }}>
                     <Bar
+                        key={String(isSidebarOpen)}
                         options={barChartOptions}
                         data={yearChartData}
                         plugins={gradientBarPlugin}

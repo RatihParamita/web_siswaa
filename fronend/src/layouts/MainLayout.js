@@ -276,6 +276,16 @@ const MainLayout = ({ children }) => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+    const childrenWithProps = React.Children.map(children, child => {
+        // Hanya tambahkan prop jika child adalah elemen React yang valid dan bukan string/null/dll.
+        if (React.isValidElement(child)) {
+            // Kita juga bisa mengecek jenis komponen child jika kita hanya ingin meneruskan ke komponen tertentu
+            // Misalnya: if (child.type.displayName === 'Dashboard') { ... }
+            return React.cloneElement(child, { isSidebarOpen });
+        }
+        return child;
+    });
+
     return (
         <div className="flex bg-gray-100 min-h-screen">
             {/* Kirim state dan fungsi sebagai props ke anak-anaknya */}
@@ -284,7 +294,7 @@ const MainLayout = ({ children }) => {
             <div className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-20'}`}>
                 <Header toggleSidebar={toggleSidebar} />
                 <main className="p-8">
-                    {children}
+                    {childrenWithProps}
                 </main>
             </div>
         </div>
