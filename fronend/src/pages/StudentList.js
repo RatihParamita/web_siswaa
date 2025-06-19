@@ -256,19 +256,20 @@ function StudentList() {
             startY: startY,
             theme: 'grid',
             headStyles: {
-                fillColor: [13, 71, 161],
+                fillColor: [0, 0, 0],
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
                 font: 'Times'
             },
             alternateRowStyles: {
-                fillColor: [245, 245, 245]
+                fillColor: [238, 238, 238]
             },
             styles: {
                 fontSize: 10,
-                cellPadding: 3,
-                rowHeight: 10,
-                font: 'Times'
+                cellPadding: 2,
+                rowHeight: 5,
+                font: 'Times',
+                textColor: [0, 0, 0]
             }
         });
         doc.save('Data Mahasiswa.pdf');
