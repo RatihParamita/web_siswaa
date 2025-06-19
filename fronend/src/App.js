@@ -9,6 +9,7 @@ import StudentEditForm from './forms/StudentEditForm';
 import StudentDetailForm from './forms/StudentDetailForm';
 import StudentDeleteForm from './forms/StudentDeleteForm';
 import CityList from './pages/CityList';
+import CityDeleteForm from './forms/CityDeleteForm';
 
 function ProtectedRoute({ children }) {
     const token = localStorage.getItem('auth_token');
@@ -26,7 +27,8 @@ function App() {
                 <Route path="/students/edit/:id" element={<ProtectedRoute><StudentEditForm /></ProtectedRoute>} />
                 <Route path="/students/detail/:id" element={<ProtectedRoute><StudentDetailForm /></ProtectedRoute>} />
                 <Route path="/students/delete/:id" element={<ProtectedRoute><StudentDeleteForm /></ProtectedRoute>} />
-                <Route path="/cities" element={<ProtectedRoute><CityList /></ProtectedRoute>} /> 
+                <Route path="/cities" element={<ProtectedRoute><CityList /></ProtectedRoute>} />
+                <Route path="/cities/delete/:id" element={<ProtectedRoute><CityDeleteForm /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to={localStorage.getItem('auth_token') ? "/dashboard" : "/login"} />} />
             </Routes>
         </Router>

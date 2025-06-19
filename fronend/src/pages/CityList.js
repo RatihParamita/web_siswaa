@@ -3,6 +3,8 @@ import axios from 'axios';
 import MainLayout from '../layouts/MainLayout';
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 
+import CityDeleteForm from '../forms/CityDeleteForm';
+
 function CityList() {
     const [cities, setCities] = useState([]);
     const authToken = localStorage.getItem('auth_token');
@@ -11,6 +13,10 @@ function CityList() {
     const [editingCity, setEditingCity] = useState(null); // Menyimpan data kota yang sedang diedit
     const [formData, setFormData] = useState({ name: '' }); // Data untuk input form
     const [errors, setErrors] = useState({}); // Untuk error validasi
+
+    // --- State baru untuk form konfirmasi hapus ---
+    const [showDeleteForm, setShowDeleteForm] = useState(false);
+    const [cityToDelete, setCityToDelete] = useState(null); // Menyimpan kota yang akan dihapus
 
     // Fungsi untuk mengambil data kota dari API
     const fetchCities = async () => {
@@ -69,16 +75,30 @@ function CityList() {
         }
     };
     
-    const handleDelete = async (id) => {
-        if (window.confirm("Yakin ingin menghapus kota ini? Ini mungkin mempengaruhi data mahasiswa yang ada.")) {
-            try {
-                await axios.delete(`http://localhost:8000/api/cities/${id}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
-                fetchCities();
-            } catch (error) {
-                alert('Gagal menghapus kota.');
-            }
+    // --- Fungsi untuk membuka form konfirmasi hapus ---
+    const confirmDelete = (city) => {
+        setCityToDelete(city); // Simpan data kota yang akan dihapus
+        setShowDeleteForm(true); // Tampilkan form
+    };
+
+    // --- Fungsi untuk menutup form konfirmasi hapus ---
+    const cancelDelete = () => {
+        setShowDeleteForm(false);
+        setCityToDelete(null); // Kosongkan data kota yang akan dihapus
+    };
+
+    // --- Fungsi yang benar-benar melakukan penghapusan ---
+    const executeDelete = async (id) => {
+        try {
+            await axios.delete(`http://localhost:8000/api/cities/${id}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            fetchCities(); // Refresh daftar kota
+            cancelDelete(); // Tutup form setelah berhasil dihapus
+        } catch (error) {
+            alert('Gagal menghapus kota.');
+            console.error("Error deleting city:", error);
+            cancelDelete(); // Tetap tutup form meskipun gagal
         }
     };
 
@@ -135,13 +155,22 @@ function CityList() {
                                 <td className="py-3 px-4">{city.name}</td>
                                 <td className="py-3 px-4 flex space-x-4">
                                     <button onClick={() => handleEdit(city)} className="text-yellow-500 hover:text-yellow-700" title="Edit"><FaEdit /></button>
-                                    <button onClick={() => handleDelete(city.id)} className="text-red-500 hover:text-red-700" title="Hapus"><FaTrash /></button>
+                                    <button onClick={() => confirmDelete(city)} className="text-red-500 hover:text-red-700" title="Hapus"><FaTrash /></button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
+            {/* Render form konfirmasi hapus */}
+            {showDeleteForm && (
+                <CityDeleteForm
+                    city={cityToDelete}
+                    onClose={cancelDelete}
+                    onDelete={executeDelete} // Panggil executeDelete saat tombol hapus di form diklik
+                />
+            )}
         </MainLayout>
     );
 }
