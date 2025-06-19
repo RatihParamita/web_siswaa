@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FaUniversity } from 'react-icons/fa'; // Contoh ikon
@@ -8,7 +8,21 @@ function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false); // State untuk loading
+    const [showContent, setShowContent] = useState(false); // State baru untuk efek fade
+    const [moveUp, setMoveUp] = useState(false); // State baru untuk slide-in
     const navigate = useNavigate();
+
+    // Efek untuk memicu fade-in saat komponen dimuat
+    useEffect(() => {
+        // Setelah komponen di-mount, set showContent menjadi true
+        // Memberikan sedikit delay agar transisi CSS punya waktu untuk diaplikasikan dari opacity-0
+        const timer = setTimeout(() => {
+            setShowContent(true);
+            setMoveUp(true);
+        }, 100); // Delay 100ms
+
+        return () => clearTimeout(timer); // Cleanup timer jika komponen unmount sebelum timer selesai
+    }, []); // Array dependensi kosong agar hanya berjalan sekali saat mount
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -37,8 +51,16 @@ function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <div className={`
+            flex items-center justify-center min-h-screen bg-blue-100
+            transition-opacity duration-700 ease-in-out ${showContent ? 'opacity-100' : 'opacity-0'}
+        `}>
+            <div className={`
+                w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md
+                transition-all duration-700 ease-in-out // Menggabungkan transisi untuk opacity & transform
+                ${showContent ? 'opacity-100' : 'opacity-0'} // Efek fade
+                ${moveUp ? 'translate-y-0' : 'translate-y-16'} // Efek slide dari bawah ke atas
+            `}>
                 <div className="text-center">
                     <FaUniversity className="mx-auto h-12 w-auto text-blue-900" />
                     <h2 className="mt-6 text-3xl font-bold text-gray-900">
