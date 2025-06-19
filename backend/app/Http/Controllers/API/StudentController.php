@@ -104,8 +104,8 @@ class StudentController extends Controller
             'students.*.nim' => 'required|string|unique:students,nim', // Pastikan NIM unik
             'students.*.name' => 'required|string|max:255',
             'students.*.born_date' => 'required|date_format:Y-m-d', // Perhatikan format tanggal YYYY-MM-DD
-            'students.*.city' => 'required|string', // Sesuai dengan kolom 'city' di tabel
             'students.*.gender' => 'required|string', // Jika gender juga ada di import
+            'students.*.city' => 'required|string', // Sesuai dengan kolom 'city' di tabel
             'students.*.address' => 'required|string', // Jika address juga ada di import
         ]);
 
