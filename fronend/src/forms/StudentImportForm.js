@@ -18,7 +18,7 @@ const StudentImportForm = ({ isOpen, onClose, onImportSuccess }) => {
     useEffect(() => {
         if (isOpen) {
             setShouldRender(true); // Pastikan komponen dirender untuk fade-in
-            // Reset state form atau pesan saat modal dibuka
+            // Reset state form atau pesan saat form dibuka
             setSelectedFile(null);
             setMessage('');
             setIsLoading(false);
@@ -122,7 +122,7 @@ const StudentImportForm = ({ isOpen, onClose, onImportSuccess }) => {
                 setMessage(response.data.message || 'Data berhasil diimpor!');
                 onImportSuccess(); // Refresh tabel setelah impor
                 setSelectedFile(null); // Reset file
-                // onClose(); // Opsional: tutup modal otomatis setelah sukses
+                // onClose(); // Opsional: tutup form otomatis setelah sukses
             } catch (error) {
                 console.error("Error importing data:", error.response?.data || error.message);
                 setMessage(error.response?.data?.message || 'Gagal mengimpor data. Pastikan format file benar.');
@@ -138,14 +138,14 @@ const StudentImportForm = ({ isOpen, onClose, onImportSuccess }) => {
         <div
             className={`fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50
                       transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-            // Tambahkan onClick untuk menutup modal saat mengklik di luar area konten
+            // Tambahkan onClick untuk menutup form saat mengklik di luar area konten
             // Namun pastikan tidak menutup saat transisi fade-out
             onClick={onClose}
         >
             <div
                 className={`bg-white p-6 rounded-lg shadow-xl w-full max-w-md mx-4
                           transform transition-transform duration-300 ${showContent ? 'scale-100' : 'scale-95'}`}
-                onClick={(e) => e.stopPropagation()} // Mencegah klik di dalam modal menutup modal
+                onClick={(e) => e.stopPropagation()} // Mencegah klik di dalam form menutup form
             >
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-gray-800">Impor Data Mahasiswa</h2>
