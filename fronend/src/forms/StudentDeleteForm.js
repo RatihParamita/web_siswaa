@@ -6,8 +6,8 @@ import { FaTimes, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa'; 
 // onClose: Fungsi, dipanggil saat form ditutup (cancel).
 // onConfirm: Fungsi, dipanggil saat pengguna mengkonfirmasi penghapusan. Akan menerima studentId sebagai argumen.
 // studentId: ID mahasiswa yang akan dihapus.
-// studentName: Nama mahasiswa (opsional, untuk tampilan yang lebih personal).
-function StudentDeleteForm({ isOpen, onClose, onConfirm, studentId, studentName }) {
+// studentToDelete: Objek data mahasiswa lengkap yang akan dihapus.
+function StudentDeleteForm({ isOpen, onClose, onConfirm, studentToDelete }) {
     // State untuk mengontrol efek fade
     const [showContent, setShowContent] = useState(false);
 
@@ -30,7 +30,9 @@ function StudentDeleteForm({ isOpen, onClose, onConfirm, studentId, studentName 
     const handleConfirmClick = () => {
         setShowContent(false); // Mulai fade-out
         setTimeout(() => {
-            onConfirm(studentId); // Panggil fungsi konfirmasi dari parent
+            if (studentToDelete) { // Pastikan objek ada sebelum memanggil onConfirm
+                onConfirm(studentToDelete.id); // Panggil fungsi konfirmasi dari parent, teruskan ID
+            }
         }, 300); // Sesuaikan dengan durasi transisi
     };
 
@@ -64,9 +66,22 @@ function StudentDeleteForm({ isOpen, onClose, onConfirm, studentId, studentName 
                     <p className="text-lg text-gray-700">
                         Apakah Anda yakin ingin menghapus data mahasiswa ini:
                     </p>
-                    <p className="text-xl font-semibold text-red-600 mt-2">
-                        {studentName || "Mahasiswa ini"}
-                    </p>
+                    {/* Tampilan detail data mahasiswa */}
+                    {studentToDelete ? (
+                        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-left">
+                            <p className="font-semibold text-red-700 mb-2">Profil Mahasiswa:</p>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-800">
+                                <p><span className="font-medium">NIM:</span> {studentToDelete.nim}</p>
+                                <p><span className="font-medium">Nama:</span> {studentToDelete.name}</p>
+                                <p><span className="font-medium">Tanggal Lahir:</span> {studentToDelete.born_date}</p>
+                                <p><span className="font-medium">Gender:</span> {studentToDelete.gender}</p>
+                                <p><span className="font-medium">Kota:</span> {studentToDelete.city}</p>
+                                <p><span className="font-medium">Alamat:</span> {studentToDelete.address}</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-red-500 text-sm mt-2">Profil mahasiswa tidak tersedia.</p>
+                    )}
                     <p className="text-sm text-gray-500 mt-1">Tindakan ini tidak dapat dibatalkan!</p>
                 </div>
 

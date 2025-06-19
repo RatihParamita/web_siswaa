@@ -33,8 +33,7 @@ function StudentList() {
     const [editingStudentId, setEditingStudentId] = useState(null);
     // State baru untuk mengontrol visibilitas form delete dan ID
     const [isDeleteFormOpen, setIsDeleteFormOpen] = useState(false);
-    const [deletingStudentId, setDeletingStudentId] = useState(null);
-    const [deletingStudentName, setDeletingStudentName] = useState(''); // Untuk menampilkan nama di konfirmasi
+    const [studentToDelete, setStudentToDelete] = useState(null); // Sekarang akan menyimpan seluruh objek mahasiswa
 
     // Fungsi untuk mengambil data mahasiswa (dipisah agar bisa dipanggil ulang)
     const fetchStudents = async () => {
@@ -64,38 +63,40 @@ function StudentList() {
     }, [searchTerm, allStudents]);
 
     // Fungsi yang dipanggil saat tombol hapus di tabel diklik
-    const handleDeleteClick = (studentId, studentName) => {
-        setDeletingStudentId(studentId);
-        setDeletingStudentName(studentName);
-        setIsDeleteFormOpen(true); // Buka form konfirmasi
+    const handleDeleteClick = (studentId) => {
+        // Cari objek mahasiswa lengkap dari allStudents
+        const student = allStudents.find(s => s.id === studentId);
+        if (student) {
+            setStudentToDelete(student); // Simpan objek lengkap
+            setIsDeleteFormOpen(true); // Buka form konfirmasi
+        } else {
+            console.warn(`Student with ID ${studentId} not found for deletion.`);
+        }
     };
 
     // Fungsi yang dipanggil dari form StudentDeleteForm saat konfirmasi
     const handleConfirmDelete = async () => {
-        if (!deletingStudentId) return; // Pastikan ada ID yang akan dihapus
+        if (!studentToDelete) return; // Pastikan ada objek mahasiswa yang akan dihapus
 
         try {
-            await axios.delete(`http://localhost:8000/api/students/${deletingStudentId}`, {
+            await axios.delete(`http://localhost:8000/api/students/${studentToDelete.id}`, { // Gunakan studentToDelete.id
                 headers: { 'Authorization': `Bearer ${authToken}` }
             });
             fetchStudents(); // Refresh data setelah penghapusan
             setIsDeleteFormOpen(false); // Tutup form setelah berhasil
-            setDeletingStudentId(null);
-            setDeletingStudentName('');
+            setStudentToDelete(null); // Reset objek mahasiswa yang akan dihapus
         } catch (error) {
             console.error("Gagal menghapus data mahasiswa:", error);
             // Anda bisa menambahkan notifikasi error di sini jika perlu
             setIsDeleteFormOpen(false); // Tutup form meskipun ada error
-            setDeletingStudentId(null);
-            setDeletingStudentName('');
+            setStudentToDelete(null);
         }
     };
 
     // Fungsi untuk menutup form delete
     const handleCloseDeleteForm = () => {
         setIsDeleteFormOpen(false);
-        setDeletingStudentId(null);
-        setDeletingStudentName('');
+        setStudentToDelete(null); // Reset objek mahasiswa yang akan dihapus
     };
 
     // Fungsi untuk membuka form detail
@@ -242,7 +243,7 @@ function StudentList() {
                                             <FaEdit />
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteClick(student.id, student.name)} // Panggil fungsi delete
+                                            onClick={() => handleDeleteClick(student.id)} // Hanya meneruskan ID
                                             className="text-red-500 hover:text-red-700"
                                             title="Hapus"
                                         >
@@ -301,8 +302,7 @@ function StudentList() {
                 isOpen={isDeleteFormOpen}
                 onClose={handleCloseDeleteForm}
                 onConfirm={handleConfirmDelete} // Fungsi yang akan dieksekusi saat konfirmasi hapus
-                studentId={deletingStudentId}
-                studentName={deletingStudentName} // Opsional: untuk menampilkan nama di konfirmasi
+                studentToDelete={studentToDelete} // Meneruskan seluruh objek mahasiswa
             />
         </MainLayout>
     );
