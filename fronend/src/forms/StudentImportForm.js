@@ -192,10 +192,10 @@ const StudentImportForm = ({ isOpen, onClose, onImportSuccess }) => {
                 <div className="flex justify-end space-x-3">
                     <button
                         onClick={onClose}
-                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg"
+                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg flex items-center"
                         disabled={isLoading}
                     >
-                        Batal
+                        <FaTimes className="mr-2" /> Batal
                     </button>
                     <button
                         onClick={handleImport}
